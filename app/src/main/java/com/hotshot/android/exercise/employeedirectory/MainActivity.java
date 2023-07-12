@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -33,12 +34,14 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements
+                                                    EmployeeService.NetworkCallCompletedListener {
     EmployeeListAdapter adapter;
     List<Employee> employeeList = new ArrayList<>();
     RecyclerView recyclerView;
     public static final String TAG = MainActivity.class.getSimpleName();
     private OkHttpClient okHttpClient;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     EmployeeService employeeService;
 
@@ -56,113 +59,16 @@ public class MainActivity extends AppCompatActivity {
 
 
         employeeService.getEmployees(URL);
+        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override public void onRefresh() {
+                employeeService.getEmployees(URL);
+            }
+        });
+
     }
 
-//    private void getEmployees() {
-//
-//        Request request = new Request.Builder()
-//                .url(URL)
-//                .build();
-//
-//        okHttpClient.newCall(request).enqueue(new Callback() {
-//            @Override public void onFailure(@NonNull Call call, @NonNull IOException e) {
-//                Log.e(TAG, "Network Call failed.", e);
-//            }
-//
-//            @Override public void onResponse(@NonNull Call call, @NonNull Response response)
-//                    throws IOException {
-//                List<Employee> employees = new ArrayList<>();
-//                ObjectMapper objectMapper = new ObjectMapper();
-//                JSONObject jsonObject= null;
-//                JSONArray jsonArray = null;
-//                try {
-//                    //Optimize with Jackson?
-//                    jsonObject = new JSONObject(response.body().string());
-//                    jsonArray = jsonObject.getJSONArray("employees");
-//                    for(int i = 0; i<jsonArray.length(); i++) {
-//                        JSONObject element = (JSONObject) jsonArray.get(i);
-//                        Employee employee = new Employee(
-//                                UUID.fromString(element.get("uuid").toString()),
-//                                element.get("full_name").toString().trim(),
-//                                element.get("phone_number").toString().trim(),
-//                                element.get("email_address").toString().trim(),
-//                                element.get("biography").toString().trim(),
-//                                element.get("photo_url_small").toString().trim(),
-//                                element.get("photo_url_large").toString().trim(),
-//                                element.get("team").toString().trim(),
-//                                EmployeeType.valueOf(element.get("employee_type").toString().trim()),
-//                                null,
-//                                null
-//                        );
-//                        employeeList.add(employee);
-//
-//                    }
-//                } catch (JSONException e) {
-//                    throw new RuntimeException(e);
-//                }
-//
-//                getImages();
-//            }
-//        });
-//    }
-//
-//    private void getImages() {
-//        final AtomicInteger completedCalls = new AtomicInteger(0);
-//        for (Employee employee: employeeList) {
-//            Request request = new Request.Builder()
-//                    .url(employee.getSmallPhotoUrl())
-//                    .build();
-//
-//            okHttpClient.newCall(request).enqueue(new Callback() {
-//                @Override public void onFailure(@NonNull Call call, @NonNull IOException e) {
-//                    Log.e(TAG, "Network Call failed.", e);
-//                }
-//
-//                @Override public void onResponse(@NonNull Call call, @NonNull Response response)
-//                        throws IOException {
-//                    InputStream inputStream = response.body().byteStream();
-//                    Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-//                    employee.setSmallPhoto(bitmap);
-//                    completedCalls.incrementAndGet();
-//                    if(completedCalls.get() == employeeList.size()){
-//                        runOnUiThread(new Runnable() {
-//                            @Override public void run() {
-//                                adapter.notifyDataSetChanged();
-//                            }
-//                        });
-//                    }
-//                }
-//            });
-//        }
-//    }
-//
-//    private void getImages() {
-//        final AtomicInteger completedCalls = new AtomicInteger(0);
-//        for (Employee employee: employeeList) {
-//            Request request = new Request.Builder()
-//                    .url(employee.getSmallPhotoUrl())
-//                    .build();
-//
-//            okHttpClient.newCall(request).enqueue(new Callback() {
-//                @Override public void onFailure(@NonNull Call call, @NonNull IOException e) {
-//                    Log.e(TAG, "Network Call failed.", e);
-//                }
-//
-//                @Override public void onResponse(@NonNull Call call, @NonNull Response response)
-//                        throws IOException {
-//                    InputStream inputStream = response.body().byteStream();
-//                    Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-//                    employee.setSmallPhoto(bitmap);
-//                    completedCalls.incrementAndGet();
-//                    if(completedCalls.get() == employeeList.size()){
-//                        runOnUiThread(new Runnable() {
-//                            @Override public void run() {
-//                                adapter.notifyDataSetChanged();
-//                            }
-//                        });
-//                    }
-//                }
-//            });
-//        }
-//    }
+    @Override public void fetchCompleted() {
+        swipeRefreshLayout.setRefreshing(false);
+    }
 }

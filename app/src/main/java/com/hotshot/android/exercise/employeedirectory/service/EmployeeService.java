@@ -11,7 +11,6 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hotshot.android.exercise.employeedirectory.Employee;
 import com.hotshot.android.exercise.employeedirectory.EmployeeListAdapter;
 import com.hotshot.android.exercise.employeedirectory.EmployeeType;
@@ -39,6 +38,7 @@ public class EmployeeService {
     Context context;
     EmployeeListAdapter adapter;
     List<Employee> employeeList = new ArrayList<>();
+    NetworkCallCompletedListener listener;
     public static final String TAG = EmployeeService.class.getSimpleName();
 
     public EmployeeService(Context context, OkHttpClient client) {
@@ -46,9 +46,13 @@ public class EmployeeService {
         handler = new Handler(context.getMainLooper());
         this.client = client;
         this.adapter = new EmployeeListAdapter(context, employeeList);
+        if (context instanceof NetworkCallCompletedListener) {
+            this.listener = (NetworkCallCompletedListener) context;
+        }
+
     }
 
-    public EmployeeListAdapter getAdapter(){
+    public EmployeeListAdapter getAdapter() {
         return adapter;
     }
 
@@ -123,11 +127,19 @@ public class EmployeeService {
                         ((Activity) context).runOnUiThread(new Runnable() {
                             @Override public void run() {
                                 adapter.notifyDataSetChanged();
+                                if (listener != null) {
+                                    listener.fetchCompleted();
+                                }
+
                             }
                         });
                     }
                 }
             });
         }
+    }
+
+    public interface NetworkCallCompletedListener {
+        public void fetchCompleted();
     }
 }

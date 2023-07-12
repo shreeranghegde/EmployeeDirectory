@@ -50,8 +50,8 @@ public class EmployeeListAdapter extends RecyclerView.Adapter {
         if (holder instanceof EmployeeViewHolder) {
             EmployeeViewHolder employeeViewHolder = (EmployeeViewHolder) holder;
             Employee employee = employeesList.get(position);
-            employeeViewHolder.employeeFullName.append(employee.getFullName());
-            employeeViewHolder.employeeTeam.append(employee.getTeam());
+            employeeViewHolder.employeeFullName.setText(employee.getFullName());
+            employeeViewHolder.employeeTeam.setText(employee.getTeam());
             employeeViewHolder.employeePhoto.setImageBitmap(employee.getSmallPhoto());
         }
     }

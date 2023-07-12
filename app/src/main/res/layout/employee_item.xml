@@ -32,12 +32,20 @@
                     android:gravity="left">
 
                     <TextView
-                        android:id="@+id/employeeFullName"
+                        android:id="@+id/textView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:layout_marginLeft="16dp"
-                        android:text="Name: "
+                        android:text="Name: " />
+
+                    <TextView
+                        android:id="@+id/employeeFullName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="8dp"
+                        android:baselineAligned="false"
                         android:textAlignment="viewStart"
                         android:textStyle="bold" />
                 </TableRow>
@@ -49,12 +57,19 @@
                     android:gravity="left">
 
                     <TextView
-                        android:id="@+id/employeeTeam"
+                        android:id="@+id/textView2"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:layout_marginLeft="16dp"
-                        android:text="Team: "
+                        android:text="Team:" />
+
+                    <TextView
+                        android:id="@+id/employeeTeam"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="8dp"
                         android:textAlignment="viewStart" />
                 </TableRow>
 
