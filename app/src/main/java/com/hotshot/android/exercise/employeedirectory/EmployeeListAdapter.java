@@ -18,13 +18,13 @@ import java.util.List;
 
 public class EmployeeListAdapter extends RecyclerView.Adapter {
     private Context context;
-    List<Employee> employeesList = new ArrayList<>();
+    List<Employee> employeeList = new ArrayList<>();
     public static final String TAG = EmployeeListAdapter.class.getSimpleName();
     private Picasso picasso;
 
-    public EmployeeListAdapter(Context context, List<Employee> employeesList) {
+    public EmployeeListAdapter(Context context, List<Employee> employeeList) {
         this.context = context;
-        this.employeesList = employeesList;
+        this.employeeList = employeeList;
         picasso = Picasso.get();
         picasso.setIndicatorsEnabled(true);
     }
@@ -51,10 +51,10 @@ public class EmployeeListAdapter extends RecyclerView.Adapter {
     }
 
     @Override public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-//        Log.d(TAG, employeesList.get(position).toString());
+//        Log.d(TAG, employeeList.get(position).toString());
         if (holder instanceof EmployeeViewHolder) {
             EmployeeViewHolder employeeViewHolder = (EmployeeViewHolder) holder;
-            Employee employee = employeesList.get(position);
+            Employee employee = employeeList.get(position);
             employeeViewHolder.employeeFullName.setText(employee.getFullName());
             employeeViewHolder.employeeTeam.setText(employee.getTeam());
 
@@ -63,6 +63,11 @@ public class EmployeeListAdapter extends RecyclerView.Adapter {
     }
 
     @Override public int getItemCount() {
-        return employeesList.size();
+        return employeeList.size();
+    }
+
+    public void setEmployeeList(List<Employee> employeeList) {
+        this.employeeList = employeeList;
+        notifyDataSetChanged();
     }
 }

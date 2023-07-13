@@ -4,28 +4,22 @@ import static com.hotshot.android.exercise.employeedirectory.constants.Network.U
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.Handler;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import com.hotshot.android.exercise.employeedirectory.Employee;
-import com.hotshot.android.exercise.employeedirectory.EmployeeListAdapter;
 import com.hotshot.android.exercise.employeedirectory.EmployeeType;
-import com.squareup.picasso.Picasso;
+import com.hotshot.android.exercise.employeedirectory.networking.NetworkingClient;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -35,29 +29,25 @@ import okhttp3.Response;
 
 public class EmployeeService {
     OkHttpClient client;
-    Handler handler;
     Context context;
-    EmployeeListAdapter adapter;
+
     List<Employee> employeeList = new ArrayList<>();
     NetworkCallCompletedListener listener;
     public static final String TAG = EmployeeService.class.getSimpleName();
 
-    public EmployeeService(Context context, OkHttpClient client) {
+    public EmployeeService(Context context) {
         this.context = context;
-        handler = new Handler(context.getMainLooper());
-        this.client = client;
-        this.adapter = new EmployeeListAdapter(context, employeeList);
+        this.client = NetworkingClient.getInstance();;
         if (context instanceof NetworkCallCompletedListener) {
             this.listener = (NetworkCallCompletedListener) context;
         }
-
     }
 
-    public EmployeeListAdapter getAdapter() {
-        return adapter;
+    public List<Employee> getEmployees() {
+        return employeeList;
     }
 
-    public void getEmployees(String url) {
+    public void fetchEmployees(String url) {
         Log.d(TAG, "MAKING NETWORK CALL");
         Request request = new Request.Builder()
                 .url(URL)
@@ -89,9 +79,7 @@ public class EmployeeService {
                                 element.get("photo_url_large").toString().trim(),
                                 element.get("team").toString().trim(),
                                 EmployeeType.valueOf(
-                                        element.get("employee_type").toString().trim()),
-                                null,
-                                null
+                                        element.get("employee_type").toString().trim())
                         );
                         employeeList.add(employee);
 
@@ -101,19 +89,20 @@ public class EmployeeService {
                 }
                 ((Activity) context).runOnUiThread(new Runnable() {
                     @Override public void run() {
-                        adapter.notifyDataSetChanged();
                         if (listener != null) {
                             listener.fetchCompleted();
                         }
-
                     }
                 });
             }
         });
-
     }
 
     public interface NetworkCallCompletedListener {
         public void fetchCompleted();
+    }
+
+    public void onDestroy(){
+        listener = null;
     }
 }

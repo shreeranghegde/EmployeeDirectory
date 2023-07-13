@@ -26,6 +26,4 @@ public class Employee {
     private String largePhotoUrl;
     private String team;
     private EmployeeType employeeType;
-    private Bitmap smallPhoto;
-    private Bitmap largePhoto;
 }

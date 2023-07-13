@@ -2,37 +2,20 @@ package com.hotshot.android.exercise.employeedirectory;
 
 import static com.hotshot.android.exercise.employeedirectory.constants.Network.URL;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hotshot.android.exercise.employeedirectory.networking.NetworkingClient;
 import com.hotshot.android.exercise.employeedirectory.service.EmployeeService;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity implements
                                                     EmployeeService.NetworkCallCompletedListener {
@@ -40,35 +23,53 @@ public class MainActivity extends AppCompatActivity implements
     List<Employee> employeeList = new ArrayList<>();
     RecyclerView recyclerView;
     public static final String TAG = MainActivity.class.getSimpleName();
-    private OkHttpClient okHttpClient;
     private SwipeRefreshLayout swipeRefreshLayout;
-
     EmployeeService employeeService;
+
+    EmployeeDirectoryViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        okHttpClient = NetworkingClient.getInstance();
+        employeeService = new EmployeeService(this);
+        viewModel = new ViewModelProvider(this).get(EmployeeDirectoryViewModel.class);
 
-        employeeService = new EmployeeService(this, okHttpClient);
+        this.adapter = new EmployeeListAdapter(this, viewModel.getEmployeesLiveData().getValue());
         recyclerView = findViewById(R.id.employeeList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(employeeService.getAdapter());
+        recyclerView.setAdapter(adapter);
+
+        if(viewModel.getEmployeesLiveData().getValue().size() == 0){
+            employeeService.fetchEmployees(URL);
+        }
 
 
-        employeeService.getEmployees(URL);
+        viewModel.getEmployeesLiveData().observe(this, new Observer<List<Employee>>() {
+            @Override public void onChanged(List<Employee> employeeList) {
+                // DiffUtil?
+                Log.d(TAG, "INSIDE LIVE DATA OBSERVER");
+                adapter.setEmployeeList(employeeList);
+            }
+        });
+
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override public void onRefresh() {
-                employeeService.getEmployees(URL);
+                employeeService.fetchEmployees(URL);
             }
         });
 
     }
 
     @Override public void fetchCompleted() {
+        viewModel.getEmployeesLiveData().setValue(employeeService.getEmployees());
         swipeRefreshLayout.setRefreshing(false);
+    }
+
+    @Override protected void onDestroy() {
+        super.onDestroy();
+        employeeService.onDestroy();
     }
 }
