@@ -1,6 +1,4 @@
-package com.hotshot.android.exercise.employeedirectory;
-
-import android.graphics.Bitmap;
+package com.hotshot.android.exercise.employeedirectory.types;
 
 import java.util.UUID;
 

@@ -8,8 +8,8 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import com.hotshot.android.exercise.employeedirectory.Employee;
-import com.hotshot.android.exercise.employeedirectory.EmployeeType;
+import com.hotshot.android.exercise.employeedirectory.types.Employee;
+import com.hotshot.android.exercise.employeedirectory.types.EmployeeType;
 import com.hotshot.android.exercise.employeedirectory.networking.NetworkingClient;
 
 import org.json.JSONArray;
@@ -37,7 +37,8 @@ public class EmployeeService {
 
     public EmployeeService(Context context) {
         this.context = context;
-        this.client = NetworkingClient.getInstance();;
+        this.client = NetworkingClient.getInstance();
+        ;
         if (context instanceof NetworkCallCompletedListener) {
             this.listener = (NetworkCallCompletedListener) context;
         }
@@ -48,9 +49,14 @@ public class EmployeeService {
     }
 
     public void fetchEmployees(String url) {
-        Log.d(TAG, "MAKING NETWORK CALL");
+        if (url == null) {
+            Log.d(TAG, "INSIDE EMPTY URL");
+            listener.fetchCompleted();
+            return;
+        }
+        Log.d(TAG, "MAKING NETWORK CALL: " + url);
         Request request = new Request.Builder()
-                .url(URL)
+                .url(url)
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
@@ -69,6 +75,7 @@ public class EmployeeService {
 
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject element = (JSONObject) jsonArray.get(i);
+                        Log.d(TAG, element.toString());
                         Employee employee = new Employee(
                                 UUID.fromString(element.get("uuid").toString()),
                                 element.get("full_name").toString().trim(),
@@ -90,6 +97,7 @@ public class EmployeeService {
                 ((Activity) context).runOnUiThread(new Runnable() {
                     @Override public void run() {
                         if (listener != null) {
+                            Log.d(TAG, employeeList.toString());
                             listener.fetchCompleted();
                         }
                     }
@@ -102,7 +110,7 @@ public class EmployeeService {
         public void fetchCompleted();
     }
 
-    public void onDestroy(){
+    public void onDestroy() {
         listener = null;
     }
 }

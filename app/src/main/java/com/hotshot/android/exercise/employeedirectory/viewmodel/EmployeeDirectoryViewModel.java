@@ -1,7 +1,9 @@
-package com.hotshot.android.exercise.employeedirectory;
+package com.hotshot.android.exercise.employeedirectory.viewmodel;
 
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+
+import com.hotshot.android.exercise.employeedirectory.types.Employee;
 
 import java.util.ArrayList;
 import java.util.List;

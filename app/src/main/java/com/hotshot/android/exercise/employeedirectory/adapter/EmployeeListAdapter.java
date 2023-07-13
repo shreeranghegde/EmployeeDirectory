@@ -1,7 +1,6 @@
-package com.hotshot.android.exercise.employeedirectory;
+package com.hotshot.android.exercise.employeedirectory.adapter;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +10,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.hotshot.android.exercise.employeedirectory.types.Employee;
+import com.hotshot.android.exercise.employeedirectory.R;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
