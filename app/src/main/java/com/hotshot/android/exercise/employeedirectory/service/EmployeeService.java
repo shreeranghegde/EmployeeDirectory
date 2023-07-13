@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import com.hotshot.android.exercise.employeedirectory.Employee;
 import com.hotshot.android.exercise.employeedirectory.EmployeeListAdapter;
 import com.hotshot.android.exercise.employeedirectory.EmployeeType;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -57,6 +58,7 @@ public class EmployeeService {
     }
 
     public void getEmployees(String url) {
+        Log.d(TAG, "MAKING NETWORK CALL");
         Request request = new Request.Builder()
                 .url(URL)
                 .build();
@@ -97,46 +99,18 @@ public class EmployeeService {
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
+                ((Activity) context).runOnUiThread(new Runnable() {
+                    @Override public void run() {
+                        adapter.notifyDataSetChanged();
+                        if (listener != null) {
+                            listener.fetchCompleted();
+                        }
 
-                getImages(employeeList);
+                    }
+                });
             }
         });
 
-    }
-
-    private void getImages(List<Employee> employeeList) {
-        final AtomicInteger completedCalls = new AtomicInteger(0);
-        for (Employee employee : employeeList) {
-            Request request = new Request.Builder()
-                    .url(employee.getSmallPhotoUrl())
-                    .build();
-
-            client.newCall(request).enqueue(new Callback() {
-                @Override public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                    Log.e(TAG, "Network Call failed.", e);
-                }
-
-                @Override public void onResponse(@NonNull Call call, @NonNull Response response)
-                        throws IOException {
-                    InputStream inputStream = response.body().byteStream();
-                    Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-                    employee.setSmallPhoto(bitmap);
-                    completedCalls.incrementAndGet();
-                    if (completedCalls.get() == employeeList.size()) {
-                        Log.d(TAG, "NETWORK CALL RESPONSE: " + employeeList.toString());
-                        ((Activity) context).runOnUiThread(new Runnable() {
-                            @Override public void run() {
-                                adapter.notifyDataSetChanged();
-                                if (listener != null) {
-                                    listener.fetchCompleted();
-                                }
-
-                            }
-                        });
-                    }
-                }
-            });
-        }
     }
 
     public interface NetworkCallCompletedListener {

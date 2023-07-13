@@ -11,6 +11,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,10 +20,13 @@ public class EmployeeListAdapter extends RecyclerView.Adapter {
     private Context context;
     List<Employee> employeesList = new ArrayList<>();
     public static final String TAG = EmployeeListAdapter.class.getSimpleName();
+    private Picasso picasso;
 
     public EmployeeListAdapter(Context context, List<Employee> employeesList) {
         this.context = context;
         this.employeesList = employeesList;
+        picasso = Picasso.get();
+        picasso.setIndicatorsEnabled(true);
     }
 
     public static class EmployeeViewHolder extends RecyclerView.ViewHolder {
@@ -52,7 +57,8 @@ public class EmployeeListAdapter extends RecyclerView.Adapter {
             Employee employee = employeesList.get(position);
             employeeViewHolder.employeeFullName.setText(employee.getFullName());
             employeeViewHolder.employeeTeam.setText(employee.getTeam());
-            employeeViewHolder.employeePhoto.setImageBitmap(employee.getSmallPhoto());
+
+            picasso.load(employee.getSmallPhotoUrl()).into(employeeViewHolder.employeePhoto);
         }
     }
 
