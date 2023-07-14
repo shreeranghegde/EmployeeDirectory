@@ -1,9 +1,13 @@
-package com.hotshot.android.exercise.employeedirectory;
+package com.hotshot.android.exercise.employeedirectory.activity;
 
+import static com.hotshot.android.exercise.employeedirectory.constants.ErrorStates.DEFAULT_DATA_SUBTITLE;
+import static com.hotshot.android.exercise.employeedirectory.constants.ErrorStates.DEFAULT_DATA_TITLE;
 import static com.hotshot.android.exercise.employeedirectory.constants.ErrorStates.EMPTY_DATA_SUBTITLE;
 import static com.hotshot.android.exercise.employeedirectory.constants.ErrorStates.EMPTY_DATA_TITLE;
 import static com.hotshot.android.exercise.employeedirectory.constants.ErrorStates.MALFORMED_DATA_SUBTITLE;
 import static com.hotshot.android.exercise.employeedirectory.constants.ErrorStates.MALFORMED_DATA_TITLE;
+import static com.hotshot.android.exercise.employeedirectory.constants.ErrorStates.NETWORK_ERROR_DATA_SUBTITLE;
+import static com.hotshot.android.exercise.employeedirectory.constants.ErrorStates.NETWORK_ERROR_DATA_TITLE;
 import static com.hotshot.android.exercise.employeedirectory.constants.Network.MALFORMED_DATA_URL;
 import static com.hotshot.android.exercise.employeedirectory.constants.Network.URL;
 
@@ -19,6 +23,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import com.hotshot.android.exercise.employeedirectory.R;
 import com.hotshot.android.exercise.employeedirectory.adapter.EmployeeListAdapter;
 import com.hotshot.android.exercise.employeedirectory.service.EmployeeService;
 import com.hotshot.android.exercise.employeedirectory.types.Employee;
@@ -50,17 +55,6 @@ public class MainActivity extends AppCompatActivity implements
         employeeService = new EmployeeService(this);
         viewModel = new ViewModelProvider(this).get(EmployeeDirectoryViewModel.class);
 
-        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override public void onRefresh() {
-                Log.d(TAG, "REFRESHING");
-                if (emptyStateView != null) {
-                    emptyStateView.setVisibility(View.GONE);
-                }
-                employeeService.fetchEmployees(URL);
-            }
-        });
-
         this.adapter = new EmployeeListAdapter(this, viewModel.getEmployeesLiveData().getValue());
         recyclerView = findViewById(R.id.employeeList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -70,6 +64,11 @@ public class MainActivity extends AppCompatActivity implements
             employeeService.fetchEmployees(MALFORMED_DATA_URL);
         }
 
+        handleSwipeRefresh();
+        handleEmployeeLiveDataChanges();
+    }
+
+    private void handleEmployeeLiveDataChanges() {
         viewModel.getEmployeesLiveData().observe(this, new Observer<List<Employee>>() {
             @Override public void onChanged(List<Employee> employeeList) {
                 // DiffUtil?
@@ -79,20 +78,44 @@ public class MainActivity extends AppCompatActivity implements
         });
     }
 
+    private void handleSwipeRefresh() {
+        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override public void onRefresh() {
+                if (emptyStateView != null) {
+                    emptyStateView.setVisibility(View.GONE);
+                }
+                employeeService.fetchEmployees(URL);
+            }
+        });
+    }
+
     @Override public void fetchCompleted(ResponseType responseType) {
-        viewModel.getEmployeesLiveData().setValue(employeeService.getEmployees());
+        viewModel.setEmployeesLiveData(employeeService.getEmployees());
         swipeRefreshLayout.setRefreshing(false);
+
         if (responseType != ResponseType.VALID) {
-            Log.d(TAG, "INSIDE EMPTY STATE");
             TextView errorTitle = findViewById(R.id.errorStateTitle);
             TextView errorSubTitle = findViewById(R.id.errorStateSubtitle);
-            if(responseType == ResponseType.EMPTY) {
-                errorTitle.setText(EMPTY_DATA_TITLE);
-                errorTitle.setText(EMPTY_DATA_SUBTITLE);
-            } else if (responseType == ResponseType.MALFORMED) {
-                errorTitle.setText(MALFORMED_DATA_TITLE);
-                errorSubTitle.setText(MALFORMED_DATA_SUBTITLE);
+            Log.d(TAG, responseType.toString());
+            switch (responseType) {
+                case EMPTY:
+                    errorTitle.setText(EMPTY_DATA_TITLE);
+                    errorSubTitle.setText(EMPTY_DATA_SUBTITLE);
+                    break;
+                case MALFORMED:
+                    errorTitle.setText(MALFORMED_DATA_TITLE);
+                    errorSubTitle.setText(MALFORMED_DATA_SUBTITLE);
+                    break;
+                case NETWORK_ERROR:
+                    errorTitle.setText(NETWORK_ERROR_DATA_TITLE);
+                    errorSubTitle.setText(NETWORK_ERROR_DATA_SUBTITLE);
+                    break;
+                default:
+                    errorTitle.setText(DEFAULT_DATA_TITLE);
+                    errorSubTitle.setText(DEFAULT_DATA_SUBTITLE);
             }
+
             emptyStateView = findViewById(R.id.errorStateView);
             emptyStateView.setVisibility(View.VISIBLE);
             recyclerView.setVisibility(View.GONE);
@@ -100,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements
             if (emptyStateView != null) {
                 emptyStateView.setVisibility(View.GONE);
             }
-            if(recyclerView.getVisibility() == View.GONE) {
+            if (recyclerView.getVisibility() == View.GONE) {
                 recyclerView.setVisibility(View.VISIBLE);
             }
 

@@ -14,3 +14,4 @@
 .externalNativeBuild
 .cxx
 local.properties
+app/src/main/java/com/hotshot/android/exercise/employeedirectory/constants/Data.txt

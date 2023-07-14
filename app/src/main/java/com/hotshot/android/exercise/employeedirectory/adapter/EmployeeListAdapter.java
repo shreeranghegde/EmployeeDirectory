@@ -52,7 +52,6 @@ public class EmployeeListAdapter extends RecyclerView.Adapter {
     }
 
     @Override public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-//        Log.d(TAG, employeeList.get(position).toString());
         if (holder instanceof EmployeeViewHolder) {
             EmployeeViewHolder employeeViewHolder = (EmployeeViewHolder) holder;
             Employee employee = employeeList.get(position);

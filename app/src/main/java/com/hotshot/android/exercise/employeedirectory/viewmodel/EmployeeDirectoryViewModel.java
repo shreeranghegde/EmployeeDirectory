@@ -11,15 +11,16 @@ import java.util.List;
 public class EmployeeDirectoryViewModel extends ViewModel {
     private MutableLiveData<List<Employee>> employeesLiveData;
 
+    public EmployeeDirectoryViewModel() {
+        this.employeesLiveData = new MutableLiveData<>();
+        this.employeesLiveData.setValue(new ArrayList<>());
+    }
+
     public MutableLiveData<List<Employee>> getEmployeesLiveData() {
-        if(employeesLiveData == null) {
-            employeesLiveData = new MutableLiveData<>();
-            employeesLiveData.setValue(new ArrayList<Employee>());
-        }
         return employeesLiveData;
     }
 
-    @Override protected void onCleared() {
-        super.onCleared();
+    public void setEmployeesLiveData(List<Employee> employeeList) {
+        employeesLiveData.setValue(employeeList);
     }
 }

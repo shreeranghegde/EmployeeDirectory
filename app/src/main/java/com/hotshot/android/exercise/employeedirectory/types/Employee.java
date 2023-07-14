@@ -3,20 +3,17 @@ package com.hotshot.android.exercise.employeedirectory.types;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.google.gson.annotations.SerializedName;
 
-import java.util.UUID;
-
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.ToString;
 
-// Add Lombok?
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
+@Builder
 public class Employee {
     @SerializedName("uuid")
     @JsonAlias("uuid")
