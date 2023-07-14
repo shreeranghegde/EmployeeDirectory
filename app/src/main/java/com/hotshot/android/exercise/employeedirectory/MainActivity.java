@@ -1,6 +1,9 @@
 package com.hotshot.android.exercise.employeedirectory;
 
-import static com.hotshot.android.exercise.employeedirectory.constants.Network.EMPTY_DATA_URL;
+import static com.hotshot.android.exercise.employeedirectory.constants.ErrorStates.EMPTY_DATA_SUBTITLE;
+import static com.hotshot.android.exercise.employeedirectory.constants.ErrorStates.EMPTY_DATA_TITLE;
+import static com.hotshot.android.exercise.employeedirectory.constants.ErrorStates.MALFORMED_DATA_SUBTITLE;
+import static com.hotshot.android.exercise.employeedirectory.constants.ErrorStates.MALFORMED_DATA_TITLE;
 import static com.hotshot.android.exercise.employeedirectory.constants.Network.MALFORMED_DATA_URL;
 import static com.hotshot.android.exercise.employeedirectory.constants.Network.URL;
 
@@ -13,13 +16,13 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.hotshot.android.exercise.employeedirectory.adapter.EmployeeListAdapter;
 import com.hotshot.android.exercise.employeedirectory.service.EmployeeService;
 import com.hotshot.android.exercise.employeedirectory.types.Employee;
+import com.hotshot.android.exercise.employeedirectory.types.ResponseType;
 import com.hotshot.android.exercise.employeedirectory.viewmodel.EmployeeDirectoryViewModel;
 
 import java.util.ArrayList;
@@ -76,19 +79,31 @@ public class MainActivity extends AppCompatActivity implements
         });
     }
 
-    @Override public void fetchCompleted() {
+    @Override public void fetchCompleted(ResponseType responseType) {
         viewModel.getEmployeesLiveData().setValue(employeeService.getEmployees());
         swipeRefreshLayout.setRefreshing(false);
-        if (viewModel.getEmployeesLiveData().getValue().size() == 0) {
+        if (responseType != ResponseType.VALID) {
             Log.d(TAG, "INSIDE EMPTY STATE");
-            emptyStateView = findViewById(R.id.emptyStateView);
+            TextView errorTitle = findViewById(R.id.errorStateTitle);
+            TextView errorSubTitle = findViewById(R.id.errorStateSubtitle);
+            if(responseType == ResponseType.EMPTY) {
+                errorTitle.setText(EMPTY_DATA_TITLE);
+                errorTitle.setText(EMPTY_DATA_SUBTITLE);
+            } else if (responseType == ResponseType.MALFORMED) {
+                errorTitle.setText(MALFORMED_DATA_TITLE);
+                errorSubTitle.setText(MALFORMED_DATA_SUBTITLE);
+            }
+            emptyStateView = findViewById(R.id.errorStateView);
             emptyStateView.setVisibility(View.VISIBLE);
             recyclerView.setVisibility(View.GONE);
         } else {
             if (emptyStateView != null) {
                 emptyStateView.setVisibility(View.GONE);
             }
-            recyclerView.setVisibility(View.VISIBLE);
+            if(recyclerView.getVisibility() == View.GONE) {
+                recyclerView.setVisibility(View.VISIBLE);
+            }
+
         }
     }
 

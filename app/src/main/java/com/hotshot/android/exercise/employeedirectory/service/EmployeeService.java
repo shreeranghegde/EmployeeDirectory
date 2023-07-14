@@ -8,15 +8,21 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.hotshot.android.exercise.employeedirectory.types.Employee;
 import com.hotshot.android.exercise.employeedirectory.types.EmployeeType;
 import com.hotshot.android.exercise.employeedirectory.networking.NetworkingClient;
+import com.hotshot.android.exercise.employeedirectory.types.ResponseType;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -34,9 +40,11 @@ public class EmployeeService {
     List<Employee> employeeList = new ArrayList<>();
     NetworkCallCompletedListener listener;
     public static final String TAG = EmployeeService.class.getSimpleName();
+    Gson gson;
 
     public EmployeeService(Context context) {
         this.context = context;
+        gson = new Gson();
         this.client = NetworkingClient.getInstance();
         ;
         if (context instanceof NetworkCallCompletedListener) {
@@ -51,13 +59,15 @@ public class EmployeeService {
     public void fetchEmployees(String url) {
         if (url == null) {
             Log.d(TAG, "INSIDE EMPTY URL");
-            listener.fetchCompleted();
+            listener.fetchCompleted(ResponseType.EMPTY);
             return;
         }
         Log.d(TAG, "MAKING NETWORK CALL: " + url);
         Request request = new Request.Builder()
                 .url(url)
                 .build();
+
+
 
         client.newCall(request).enqueue(new Callback() {
             @Override public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -66,39 +76,29 @@ public class EmployeeService {
 
             @Override public void onResponse(@NonNull Call call, @NonNull Response response)
                     throws IOException {
+
                 JSONObject jsonObject = null;
                 JSONArray jsonArray = null;
                 try {
-                    //Optimize with Jackson?
                     jsonObject = new JSONObject(response.body().string());
                     jsonArray = jsonObject.getJSONArray("employees");
-
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        JSONObject element = (JSONObject) jsonArray.get(i);
-                        Log.d(TAG, element.toString());
-                        Employee employee = new Employee(
-                                UUID.fromString(element.get("uuid").toString()),
-                                element.get("full_name").toString().trim(),
-                                element.get("phone_number").toString().trim(),
-                                element.get("email_address").toString().trim(),
-                                element.get("biography").toString().trim(),
-                                element.get("photo_url_small").toString().trim(),
-                                element.get("photo_url_large").toString().trim(),
-                                element.get("team").toString().trim(),
-                                EmployeeType.valueOf(
-                                        element.get("employee_type").toString().trim())
-                        );
-                        employeeList.add(employee);
-
-                    }
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    employeeList = objectMapper.readValue(String.valueOf(jsonArray),
+                                                          new TypeReference<List<Employee>>(){});
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
                 ((Activity) context).runOnUiThread(new Runnable() {
                     @Override public void run() {
+                        ResponseType responseType = ResponseType.VALID;
                         if (listener != null) {
                             Log.d(TAG, employeeList.toString());
-                            listener.fetchCompleted();
+                            if(employeeList.size() == 0) {
+                                responseType = ResponseType.EMPTY;
+                            } else if(employeeList.stream().anyMatch(employee -> !employee.isValid())) {
+                                responseType = ResponseType.MALFORMED;
+                            }
+                            listener.fetchCompleted(responseType);
                         }
                     }
                 });
@@ -107,7 +107,7 @@ public class EmployeeService {
     }
 
     public interface NetworkCallCompletedListener {
-        public void fetchCompleted();
+        public void fetchCompleted(ResponseType responseType);
     }
 
     public void onDestroy() {

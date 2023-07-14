@@ -59,7 +59,7 @@ public class EmployeeListAdapter extends RecyclerView.Adapter {
             employeeViewHolder.employeeFullName.setText(employee.getFullName());
             employeeViewHolder.employeeTeam.setText(employee.getTeam());
 
-            picasso.load(employee.getSmallPhotoUrl()).into(employeeViewHolder.employeePhoto);
+            picasso.load(employee.getSmallPhotoUrl()).error(R.drawable.ic_no_image).into(employeeViewHolder.employeePhoto);
         }
     }
 
