@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements
         recyclerView.setAdapter(adapter);
 
         if (viewModel.getEmployeesLiveData().getValue().size() == 0) {
-            employeeService.fetchEmployees(MALFORMED_DATA_URL);
+            employeeService.fetchEmployees(URL);
         }
 
         handleSwipeRefresh();
@@ -91,6 +91,8 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override public void fetchCompleted(ResponseType responseType) {
+        List<Employee> employees = employeeService.getEmployees();
+        employees.sort((employee) -> (employee.getTeam(), employee.getName()));
         viewModel.setEmployeesLiveData(employeeService.getEmployees());
         swipeRefreshLayout.setRefreshing(false);
 

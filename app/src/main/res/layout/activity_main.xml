@@ -5,6 +5,7 @@
     android:id="@+id/rootContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#E8E8E8"
     tools:context=".activity.MainActivity">
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -24,7 +25,7 @@
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/employeeList"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
