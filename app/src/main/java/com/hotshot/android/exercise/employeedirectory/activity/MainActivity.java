@@ -28,6 +28,7 @@ import com.hotshot.android.exercise.employeedirectory.adapter.EmployeeListAdapte
 import com.hotshot.android.exercise.employeedirectory.service.EmployeeService;
 import com.hotshot.android.exercise.employeedirectory.types.Employee;
 import com.hotshot.android.exercise.employeedirectory.types.ResponseType;
+import com.hotshot.android.exercise.employeedirectory.util.EmployeeComparator;
 import com.hotshot.android.exercise.employeedirectory.viewmodel.EmployeeDirectoryViewModel;
 
 import java.util.ArrayList;
@@ -92,8 +93,8 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override public void fetchCompleted(ResponseType responseType) {
         List<Employee> employees = employeeService.getEmployees();
-        employees.sort((employee) -> (employee.getTeam(), employee.getName()));
-        viewModel.setEmployeesLiveData(employeeService.getEmployees());
+        employees.sort(EmployeeComparator.getEmployeeComparator());
+        viewModel.setEmployeesLiveData(employees);
         swipeRefreshLayout.setRefreshing(false);
 
         if (responseType != ResponseType.VALID) {
