@@ -92,7 +92,6 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override public void fetchCompleted(ResponseType responseType) {
         List<Employee> employees = employeeService.getEmployees();
-        employees.sort((employee) -> (employee.getTeam(), employee.getName()));
         viewModel.setEmployeesLiveData(employeeService.getEmployees());
         swipeRefreshLayout.setRefreshing(false);
 
