@@ -3,4 +3,7 @@
     <style name="circular">
         <item name="cornerSize">50%</item>
     </style>
+    <style name="roundedCorner1" parent="Theme.AppCompat.Dialog">
+        <item name="android:windowBackground">@drawable/rounded_dialog</item>
+    </style>
 </resources>

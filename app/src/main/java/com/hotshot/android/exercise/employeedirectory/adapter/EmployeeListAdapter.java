@@ -1,6 +1,8 @@
 package com.hotshot.android.exercise.employeedirectory.adapter;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.hotshot.android.exercise.employeedirectory.types.Employee;
 import com.hotshot.android.exercise.employeedirectory.R;
+import com.hotshot.android.exercise.employeedirectory.view.EmployeeDetailDialog;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -22,24 +25,54 @@ public class EmployeeListAdapter extends RecyclerView.Adapter {
     List<Employee> employeeList = new ArrayList<>();
     public static final String TAG = EmployeeListAdapter.class.getSimpleName();
     private Picasso picasso;
+    private EmployeeDetailDialog employeeDetailDialog;
 
-    public EmployeeListAdapter(Context context, List<Employee> employeeList) {
+    public EmployeeListAdapter(Context context, List<Employee> employeeList,
+                               EmployeeDetailDialog employeeDetailDialog) {
         this.context = context;
         this.employeeList = employeeList;
+        this.employeeDetailDialog = employeeDetailDialog;
         picasso = Picasso.get();
         picasso.setIndicatorsEnabled(true);
     }
 
-    public static class EmployeeViewHolder extends RecyclerView.ViewHolder {
+    public static class EmployeeViewHolder extends RecyclerView.ViewHolder
+            implements View.OnClickListener {
         ImageView employeePhoto;
         TextView employeeFullName;
         TextView employeeTeam;
+        EmployeeDetailDialog employeeDialog;
+        EmployeeClickListener listener;
 
-        public EmployeeViewHolder(@NonNull View view) {
+        public EmployeeViewHolder(@NonNull View view, EmployeeDetailDialog dialog,
+                                  Context context) {
             super(view);
             employeePhoto = view.findViewById(R.id.employeePhoto);
             employeeFullName = view.findViewById(R.id.employeeFullName);
             employeeTeam = view.findViewById(R.id.employeeTeam);
+            employeeDialog = dialog;
+
+            view.setOnClickListener(this);
+            if (context instanceof EmployeeClickListener) {
+                listener = (EmployeeClickListener) context;
+            }
+        }
+
+        @Override public void onClick(View v) {
+            //do something when view is clicked
+
+            int position = getAdapterPosition();
+            listener.onEmployeeClicked(position);
+            employeeDialog.setEmployeeIndex(position);
+            if (listener instanceof DialogInterface.OnDismissListener) {
+                employeeDialog.setOnDismissListener((DialogInterface.OnDismissListener) listener);
+            }
+            employeeDialog.show();
+            Log.d(TAG, String.valueOf(position));
+        }
+
+        public interface EmployeeClickListener {
+            public void onEmployeeClicked(int position);
         }
     }
 
@@ -47,8 +80,7 @@ public class EmployeeListAdapter extends RecyclerView.Adapter {
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View employeeListView = LayoutInflater.from(this.context).inflate(R.layout.employee_item,
                                                                           parent, false);
-
-        return new EmployeeViewHolder(employeeListView);
+        return new EmployeeViewHolder(employeeListView, employeeDetailDialog, this.context);
     }
 
     @Override public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
@@ -57,8 +89,8 @@ public class EmployeeListAdapter extends RecyclerView.Adapter {
             Employee employee = employeeList.get(position);
             employeeViewHolder.employeeFullName.setText(employee.getFullName());
             employeeViewHolder.employeeTeam.setText(employee.getTeam());
-
-            picasso.load(employee.getSmallPhotoUrl()).error(R.drawable.ic_no_image).into(employeeViewHolder.employeePhoto);
+            picasso.load(employee.getSmallPhotoUrl()).error(R.drawable.ic_no_image).into(
+                    employeeViewHolder.employeePhoto);
         }
     }
 

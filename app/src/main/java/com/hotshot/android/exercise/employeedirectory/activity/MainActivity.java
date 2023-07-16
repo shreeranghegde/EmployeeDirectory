@@ -8,19 +8,22 @@ import static com.hotshot.android.exercise.employeedirectory.constants.ErrorStat
 import static com.hotshot.android.exercise.employeedirectory.constants.ErrorStates.MALFORMED_DATA_TITLE;
 import static com.hotshot.android.exercise.employeedirectory.constants.ErrorStates.NETWORK_ERROR_DATA_SUBTITLE;
 import static com.hotshot.android.exercise.employeedirectory.constants.ErrorStates.NETWORK_ERROR_DATA_TITLE;
-import static com.hotshot.android.exercise.employeedirectory.constants.Network.MALFORMED_DATA_URL;
 import static com.hotshot.android.exercise.employeedirectory.constants.Network.URL;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.hotshot.android.exercise.employeedirectory.R;
@@ -29,13 +32,16 @@ import com.hotshot.android.exercise.employeedirectory.service.EmployeeService;
 import com.hotshot.android.exercise.employeedirectory.types.Employee;
 import com.hotshot.android.exercise.employeedirectory.types.ResponseType;
 import com.hotshot.android.exercise.employeedirectory.util.EmployeeComparator;
+import com.hotshot.android.exercise.employeedirectory.view.EmployeeDetailDialog;
 import com.hotshot.android.exercise.employeedirectory.viewmodel.EmployeeDirectoryViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements
-                                                    EmployeeService.NetworkCallCompletedListener {
+                                                    EmployeeService.NetworkCallCompletedListener,
+                                                    EmployeeListAdapter.EmployeeViewHolder.EmployeeClickListener,
+                                                    DialogInterface.OnDismissListener {
     EmployeeListAdapter adapter;
     List<Employee> employeeList = new ArrayList<>();
     RecyclerView recyclerView;
@@ -46,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements
     EmployeeDirectoryViewModel viewModel;
     View rootContainer;
     View emptyStateView;
+    EmployeeDetailDialog employeeDetailDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,8 +62,10 @@ public class MainActivity extends AppCompatActivity implements
 
         employeeService = new EmployeeService(this);
         viewModel = new ViewModelProvider(this).get(EmployeeDirectoryViewModel.class);
+        employeeDetailDialog = new EmployeeDetailDialog(this, viewModel);
+        adapter = new EmployeeListAdapter(this, viewModel.getEmployeesLiveData().getValue(),
+                                          employeeDetailDialog);
 
-        this.adapter = new EmployeeListAdapter(this, viewModel.getEmployeesLiveData().getValue());
         recyclerView = findViewById(R.id.employeeList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
@@ -68,6 +77,8 @@ public class MainActivity extends AppCompatActivity implements
         handleSwipeRefresh();
         handleEmployeeLiveDataChanges();
     }
+
+
 
     private void handleEmployeeLiveDataChanges() {
         viewModel.getEmployeesLiveData().observe(this, new Observer<List<Employee>>() {
@@ -92,6 +103,8 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override public void fetchCompleted(ResponseType responseType) {
+        ProgressBar bar = findViewById(R.id.progressBar);
+        bar.setVisibility(View.GONE);
         List<Employee> employees = employeeService.getEmployees();
         employees.sort(EmployeeComparator.getEmployeeComparator());
         viewModel.setEmployeesLiveData(employees);
@@ -137,5 +150,26 @@ public class MainActivity extends AppCompatActivity implements
         super.onDestroy();
         employeeService.onDestroy();
         viewModel.getEmployeesLiveData().removeObservers(this);
+    }
+
+    @Override public void onEmployeeClicked(int position) {
+
+        for (int i = 0; i < recyclerView.getChildCount(); i++) {
+            if(i == position) {
+                continue;
+            }
+            View itemView = recyclerView.getChildAt(i);
+            View itemRow = itemView.findViewById(R.id.employeeItemRow);
+            itemRow.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    @Override public void onDismiss(DialogInterface dialog) {
+        for (int i = 0; i < recyclerView.getChildCount(); i++) {
+            View itemView = recyclerView.getChildAt(i);
+            View itemRow = itemView.findViewById(R.id.employeeItemRow);
+            itemRow.setVisibility(View.VISIBLE);
+        }
+        dialog.dismiss();
     }
 }
