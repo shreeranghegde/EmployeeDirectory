@@ -106,11 +106,15 @@ public class EmployeeListAdapter extends RecyclerView.Adapter {
         return employeeList.size();
     }
 
+    private void setEmployeeList(List<Employee> employeeList) {
+        this.employeeList = employeeList;
+    }
+
     public void updateEmployees(List<Employee> newEmployees) {
         EmployeeDiffCallback callback = new EmployeeDiffCallback(employeeList, newEmployees);
         DiffUtil.DiffResult result = DiffUtil.calculateDiff(callback);
-        employeeList.clear();
-        employeeList.addAll(newEmployees);
+        Log.d(TAG, result.toString());
+        setEmployeeList(newEmployees);
         result.dispatchUpdatesTo(this);
     }
 }

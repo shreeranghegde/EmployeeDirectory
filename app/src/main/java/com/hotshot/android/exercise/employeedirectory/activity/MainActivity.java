@@ -9,6 +9,7 @@ import static com.hotshot.android.exercise.employeedirectory.constants.ErrorStat
 import static com.hotshot.android.exercise.employeedirectory.constants.ErrorStates.NETWORK_ERROR_DATA_SUBTITLE;
 import static com.hotshot.android.exercise.employeedirectory.constants.ErrorStates.NETWORK_ERROR_DATA_TITLE;
 import static com.hotshot.android.exercise.employeedirectory.constants.Network.EMPTY_DATA_URL;
+import static com.hotshot.android.exercise.employeedirectory.constants.Network.MALFORMED_DATA_URL;
 import static com.hotshot.android.exercise.employeedirectory.constants.Network.URL;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -67,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements
 
         // Fetch data only if necessary. Avoid fetching in case of orientation changes.
         if (viewModel.getEmployeesLiveData().getValue().size() == 0) {
-            employeeService.fetchEmployees(EMPTY_DATA_URL);
+            employeeService.fetchEmployees(URL);
         } else {
             removeProgressBar();
         }
