@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -29,18 +30,20 @@ public class EmployeeDetailDialog extends Dialog {
     TextView employeeDialogEmail;
     public static final String TAG = EmployeeDetailDialog.class.getSimpleName();
     public EmployeeDetailDialog(@NonNull Context context, EmployeeDirectoryViewModel viewModel) {
-//        super(context);
         super(context, R.style.roundedCorner1);
         this.viewModel = viewModel;
     }
 
 
+    /**
+     * Set the index of the selected employee.
+     * @param employeeIndex
+     */
     public void setEmployeeIndex(int employeeIndex) {
         this.employeeIndex = employeeIndex;
         if(viewModel.getEmployeesLiveData() != null) {
             employee = viewModel.getEmployeesLiveData().getValue().get(employeeIndex);
         }
-
     }
 
     @Override protected void onCreate(Bundle savedInstanceState) {
@@ -59,11 +62,15 @@ public class EmployeeDetailDialog extends Dialog {
 
         Log.d(TAG, employee.toString());
 
+        if(employee.getBiography() == null) {
+            employeeDialogBio.setVisibility(View.GONE);
+        }
         employeeDialogBio.setText(employee.getBiography());
         employeeDialogName.setText(employee.getFullName());
         employeeDialogTeam.setText(employee.getTeam());
         employeeDialogEmail.setText(employee.getEmailAddress());
-        Picasso.get().load(employee.getLargePhotoUrl()).error(R.drawable.ic_no_image).into(employeeDialogLargePhoto);
+        Picasso.get().load(employee.getLargePhotoUrl()).error(R.drawable.ic_no_image)
+                .into(employeeDialogLargePhoto);
 
     }
 }

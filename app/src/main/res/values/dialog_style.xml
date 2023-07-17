@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <style name="TransparentDialog" parent="Theme.MaterialComponents.Light.Dialog">
-        <item name="android:windowBackground">#00FFFFFF</item>
-    </style>
-</resources>

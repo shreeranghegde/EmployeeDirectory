@@ -1,5 +1,8 @@
 package com.hotshot.android.exercise.employeedirectory.constants;
 
+/**
+ * This class Holds the values to be set in TextViews in case of Error states.
+ */
 public class ErrorStates {
     public static final String EMPTY_DATA_TITLE = "No Employees Found!";
     public static final String EMPTY_DATA_SUBTITLE = "Hire some employees.";

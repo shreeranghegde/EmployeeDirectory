@@ -21,9 +21,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EmployeeListAdapter extends RecyclerView.Adapter {
-    private Context context;
-    List<Employee> employeeList = new ArrayList<>();
     public static final String TAG = EmployeeListAdapter.class.getSimpleName();
+    private Context context;
+    private List<Employee> employeeList;
+
     private Picasso picasso;
     private EmployeeDetailDialog employeeDetailDialog;
 
@@ -58,20 +59,26 @@ public class EmployeeListAdapter extends RecyclerView.Adapter {
             }
         }
 
+        /**
+         * Open Employee Summary dialog box for the view that was clicked.
+         * @param v The view that was clicked.
+         */
         @Override public void onClick(View v) {
-            //do something when view is clicked
-
             int position = getAdapterPosition();
+
             listener.onEmployeeClicked(position);
             employeeDialog.setEmployeeIndex(position);
             if (listener instanceof DialogInterface.OnDismissListener) {
                 employeeDialog.setOnDismissListener((DialogInterface.OnDismissListener) listener);
             }
             employeeDialog.show();
-            Log.d(TAG, String.valueOf(position));
         }
 
         public interface EmployeeClickListener {
+            /**
+             * Update UI elements when an employee is clicked
+             * @param position
+             */
             public void onEmployeeClicked(int position);
         }
     }

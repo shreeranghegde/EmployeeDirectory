@@ -6,6 +6,10 @@ public class NetworkingClient {
     private static OkHttpClient client;
     private NetworkingClient() {}
 
+    /**
+     * Returns OkHttpClient instance.
+     * @return OkHttpclient instance.
+     */
     public static OkHttpClient getInstance() {
         if(client == null) {
             client = new OkHttpClient();
