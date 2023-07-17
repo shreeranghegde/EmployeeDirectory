@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.hotshot.android.exercise.employeedirectory.types.Employee;
@@ -105,8 +106,11 @@ public class EmployeeListAdapter extends RecyclerView.Adapter {
         return employeeList.size();
     }
 
-    public void setEmployeeList(List<Employee> employeeList) {
-        this.employeeList = employeeList;
-        notifyDataSetChanged();
+    public void updateEmployees(List<Employee> newEmployees) {
+        EmployeeDiffCallback callback = new EmployeeDiffCallback(employeeList, newEmployees);
+        DiffUtil.DiffResult result = DiffUtil.calculateDiff(callback);
+        employeeList.clear();
+        employeeList.addAll(newEmployees);
+        result.dispatchUpdatesTo(this);
     }
 }
