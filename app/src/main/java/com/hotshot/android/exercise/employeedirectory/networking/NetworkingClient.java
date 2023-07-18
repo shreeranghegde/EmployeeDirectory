@@ -4,10 +4,17 @@ import okhttp3.OkHttpClient;
 
 public class NetworkingClient {
     private static OkHttpClient client;
-    private NetworkingClient() {}
 
+    private NetworkingClient() {
+    }
+
+    /**
+     * Returns OkHttpClient instance.
+     *
+     * @return OkHttpclient instance.
+     */
     public static OkHttpClient getInstance() {
-        if(client == null) {
+        if (client == null) {
             client = new OkHttpClient();
         }
         return client;
