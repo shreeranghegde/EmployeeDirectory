@@ -13,7 +13,12 @@ I have used the following tools and dependencies to accomplish the objectives of
 9. Lombok-1.18.28: Lombok auto-generates boiler plate code using annotations. This keeps your classes free and clean of boiler plate implementation code like getters, setters, constructors etc.
 
 ## Steps to run the app
-1. Download and install the APK file from the releases section of the github project.
+1. Download and install the APK file attached in the submission. You can follow the steps outlined [here](https://www.talkandroid.com/guides/beginner/install-apk-files-on-android/).
+   1. You can also run the app from Android Studio:
+      1. For that you will need to have developer mode enabled on your device. You can follow the steps outlined [here](https://www.lifewire.com/how-to-enable-developer-mode-on-android-4684044).
+      2. You can also set up Android Virtual Device (AVD) in Android Studio. You can follow the steps outlined [here](https://developer.android.com/studio/run/managing-avds#:~:text=AVD%20properties%20%20%20%20AVD%20property%20,different%20syste%20...%20%2014%20more%20rows%20)
+      3. After that you can run the app from Android studio. You can follow the steps outlined [here](https://developer.android.com/studio/run/)
+      4. You can also run the apk from using the adb command line. You can follow the steps outlined [here](https://developer.android.com/tools/adb#move)
 2. Once you open the app, you will be able to see the employee directory list.
 3. You can tap on any employee to see a summary of the employee.
 
