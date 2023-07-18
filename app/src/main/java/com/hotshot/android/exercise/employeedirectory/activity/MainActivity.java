@@ -8,10 +8,9 @@ import static com.hotshot.android.exercise.employeedirectory.constants.ErrorStat
 import static com.hotshot.android.exercise.employeedirectory.constants.ErrorStates.MALFORMED_DATA_TITLE;
 import static com.hotshot.android.exercise.employeedirectory.constants.ErrorStates.NETWORK_ERROR_DATA_SUBTITLE;
 import static com.hotshot.android.exercise.employeedirectory.constants.ErrorStates.NETWORK_ERROR_DATA_TITLE;
-import static com.hotshot.android.exercise.employeedirectory.constants.Network.EMPTY_DATA_URL;
-import static com.hotshot.android.exercise.employeedirectory.constants.Network.MALFORMED_DATA_URL;
 import static com.hotshot.android.exercise.employeedirectory.constants.Network.URL;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -19,7 +18,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -36,11 +34,10 @@ import com.hotshot.android.exercise.employeedirectory.view.EmployeeDetailDialog;
 import com.hotshot.android.exercise.employeedirectory.viewmodel.EmployeeDirectoryViewModel;
 
 import java.util.List;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity implements
-                                                    EmployeeService.NetworkCallCompletedListener,
-                                                    EmployeeListAdapter.EmployeeViewHolder.EmployeeClickListener,
-                                                    DialogInterface.OnDismissListener {
+                                                    EmployeeService.NetworkCallCompletedListener {
     public static final String TAG = MainActivity.class.getSimpleName();
     private EmployeeListAdapter adapter;
     private RecyclerView recyclerView;
@@ -49,6 +46,10 @@ public class MainActivity extends AppCompatActivity implements
 
     private EmployeeDirectoryViewModel viewModel;
     private View emptyStateView;
+    private EmployeeDetailDialog employeeDetailDialog;
+    private boolean isDialogShowing = false;
+    public static final String IS_DIALOG_SHOWING = "isDialogShowing";
+    public static final String EMPLOYEE_DIALOG_POSITION = "employeeDialogPosition";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,18 +57,28 @@ public class MainActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_main);
 
         // Initialize components
+        recyclerView = findViewById(R.id.employeeList);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
         employeeService = new EmployeeService(this);
         viewModel = new ViewModelProvider(this).get(EmployeeDirectoryViewModel.class);
-        EmployeeDetailDialog employeeDetailDialog = new EmployeeDetailDialog(this, viewModel);
+        employeeDetailDialog = new EmployeeDetailDialog(this, viewModel);
         adapter = new EmployeeListAdapter(this, viewModel.getEmployeesLiveData().getValue(),
                                           employeeDetailDialog);
 
-        recyclerView = findViewById(R.id.employeeList);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        // Maintain Dialog box state when orientation changes
+        if (savedInstanceState != null && savedInstanceState.containsKey(IS_DIALOG_SHOWING) &&
+                savedInstanceState.getBoolean(IS_DIALOG_SHOWING)) {
+            Log.i(TAG, "Retrieving active dialog state.");
+            employeeDetailDialog.setEmployeeIndex(
+                    savedInstanceState.getInt(EMPLOYEE_DIALOG_POSITION));
+            isDialogShowing = savedInstanceState.getBoolean(IS_DIALOG_SHOWING);
+            employeeDetailDialog.show();
+        }
         recyclerView.setAdapter(adapter);
 
         // Fetch data only if necessary. Avoid fetching in case of orientation changes.
-        if (viewModel.getEmployeesLiveData().getValue().size() == 0) {
+        if (Objects.requireNonNull(viewModel.getEmployeesLiveData().getValue()).size() == 0) {
             employeeService.fetchEmployees(URL);
         } else {
             removeProgressBar();
@@ -81,7 +92,6 @@ public class MainActivity extends AppCompatActivity implements
     private void handleEmployeeLiveDataChanges() {
         viewModel.getEmployeesLiveData().observe(this, new Observer<List<Employee>>() {
             @Override public void onChanged(List<Employee> employeeList) {
-                // DiffUtil?
                 Log.i(TAG, "Setting data in the RecycleView.");
                 adapter.updateEmployees(employeeList);
             }
@@ -157,31 +167,21 @@ public class MainActivity extends AppCompatActivity implements
         bar.setVisibility(View.GONE);
     }
 
-    @Override public void onEmployeeClicked(int position) {
-        // Make content of non-selected employees invisible before making dialog box visible
-        for (int i = 0; i < recyclerView.getChildCount(); i++) {
-            if(i == position) {
-                continue;
-            }
-            View itemView = recyclerView.getChildAt(i);
-            View itemRow = itemView.findViewById(R.id.employeeItemRow);
-            itemRow.setVisibility(View.INVISIBLE);
+    @Override protected void onSaveInstanceState(@NonNull Bundle outState) {
+        // Saving dialog state
+        isDialogShowing = employeeDetailDialog.isShowing();
+        outState.putBoolean(IS_DIALOG_SHOWING, isDialogShowing);
+        if (isDialogShowing) {
+            outState.putInt(EMPLOYEE_DIALOG_POSITION, employeeDetailDialog.getEmployeeIndex());
         }
-    }
 
-    @Override public void onDismiss(DialogInterface dialog) {
-        // Reset invisible employees content after dialog box is dismissed
-        for (int i = 0; i < recyclerView.getChildCount(); i++) {
-            View itemView = recyclerView.getChildAt(i);
-            View itemRow = itemView.findViewById(R.id.employeeItemRow);
-            itemRow.setVisibility(View.VISIBLE);
-        }
-        dialog.dismiss();
+        super.onSaveInstanceState(outState);
     }
 
     @Override protected void onDestroy() {
         super.onDestroy();
         employeeService.onDestroy();
         viewModel.getEmployeesLiveData().removeObservers(this);
+        employeeDetailDialog.dismiss();
     }
 }

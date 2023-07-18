@@ -41,6 +41,9 @@ public class Employee {
     @JsonAlias("employee_type")
     private EmployeeType employeeType;
 
+    /**
+     * @return True if mandatory fields are present
+     */
     public boolean isValid() {
         boolean mandatoryFieldsPresent =
                 employeeId != null && fullName != null && emailAddress != null

@@ -1,8 +1,6 @@
 package com.hotshot.android.exercise.employeedirectory.adapter;
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,14 +16,12 @@ import com.hotshot.android.exercise.employeedirectory.R;
 import com.hotshot.android.exercise.employeedirectory.view.EmployeeDetailDialog;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class EmployeeListAdapter extends RecyclerView.Adapter {
     public static final String TAG = EmployeeListAdapter.class.getSimpleName();
     private Context context;
     private List<Employee> employeeList;
-
     private Picasso picasso;
     private EmployeeDetailDialog employeeDetailDialog;
 
@@ -44,43 +40,29 @@ public class EmployeeListAdapter extends RecyclerView.Adapter {
         TextView employeeFullName;
         TextView employeeTeam;
         EmployeeDetailDialog employeeDialog;
-        EmployeeClickListener listener;
+        View employeeView;
 
         public EmployeeViewHolder(@NonNull View view, EmployeeDetailDialog dialog,
                                   Context context) {
             super(view);
+            employeeView = view;
             employeePhoto = view.findViewById(R.id.employeePhoto);
             employeeFullName = view.findViewById(R.id.employeeFullName);
             employeeTeam = view.findViewById(R.id.employeeTeam);
             employeeDialog = dialog;
 
             view.setOnClickListener(this);
-            if (context instanceof EmployeeClickListener) {
-                listener = (EmployeeClickListener) context;
-            }
         }
 
         /**
          * Open Employee Summary dialog box for the view that was clicked.
+         *
          * @param v The view that was clicked.
          */
         @Override public void onClick(View v) {
             int position = getAdapterPosition();
-
-            listener.onEmployeeClicked(position);
             employeeDialog.setEmployeeIndex(position);
-            if (listener instanceof DialogInterface.OnDismissListener) {
-                employeeDialog.setOnDismissListener((DialogInterface.OnDismissListener) listener);
-            }
             employeeDialog.show();
-        }
-
-        public interface EmployeeClickListener {
-            /**
-             * Update UI elements when an employee is clicked
-             * @param position
-             */
-            public void onEmployeeClicked(int position);
         }
     }
 
@@ -113,7 +95,6 @@ public class EmployeeListAdapter extends RecyclerView.Adapter {
     public void updateEmployees(List<Employee> newEmployees) {
         EmployeeDiffCallback callback = new EmployeeDiffCallback(employeeList, newEmployees);
         DiffUtil.DiffResult result = DiffUtil.calculateDiff(callback);
-        Log.d(TAG, result.toString());
         setEmployeeList(newEmployees);
         result.dispatchUpdatesTo(this);
     }

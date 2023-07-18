@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">EmployeeDirectory</string>
+
+    <string name="no_employees_title">No Employees Found!</string>
+    <string name="employee_photo_description">Photo of employee</string>
+    <string name="name_label">Name:</string>
+    <string name="team_label">Team:</string>
+    <string name="email_label">Email:</string>
 </resources>

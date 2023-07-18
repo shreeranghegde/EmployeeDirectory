@@ -1,6 +1,5 @@
 package com.hotshot.android.exercise.employeedirectory.adapter;
 
-import android.util.Log;
 
 import androidx.recyclerview.widget.DiffUtil;
 
@@ -9,7 +8,6 @@ import com.hotshot.android.exercise.employeedirectory.types.Employee;
 import java.util.List;
 
 public class EmployeeDiffCallback extends DiffUtil.Callback {
-    public static final String TAG = EmployeeDiffCallback.class.getSimpleName();
     private List<Employee> oldEmployees;
     private List<Employee> newEmployees;
 

@@ -55,11 +55,8 @@ If I had more time, I would probably try to use Retrofit instead of OkHttp as it
 Additionally, I would also spend some more time on Custom animations to make the app more appealing to the users.
 
 ## What do you think is the weakest part of your project?
-I would attribute the weakest part of my project would be a technical limitation on the way recycler view is being updated.  
-Currently, the logic uses ```notifyDataSetChanged()``` event which basically re-renders and re-binds all the elements in the recycler view.  
-This method affects the performance of the app if we are dealing with a large employee directory. I can potentially, solve this issue by using
-```notifyItemChanged(int position)```. However, I need to know the position of the changed item for which I would need to compare the newly
-fetched list to the old list. So in order to save some time I skipped the comparison of new and old list.
+I would attribute the weakest part of my project would be limited test case coverage. I have tried to cover as much testable code as I could.
+However, due to time constraints I was not able to cover some parts of the code.
 Additionally, as mentioned above, I feel that making use of retrofit libraries and custom UI animations are a couple of weak points  
 in the project as well.
 
@@ -67,4 +64,4 @@ in the project as well.
 I have not copied any code or dependencies for my project.
 
 ## Is there any other information you’d like us to know?
-Just that I enjoyed working on this project a lot and I look forward to the next steps as well.
+Just that it has been some time since I worked on android and I enjoyed working on this project a lot and I look forward to the next steps as well.
